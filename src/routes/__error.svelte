@@ -8,23 +8,22 @@
 </script>
 
 <script lang="ts">
-  import Head from '$lib/components/head.svelte'
-  import Footer from '$lib/components/footer.svelte'
+  import Card from '$lib/components/layout_card.svelte'
+  import IconHome from '~icons/heroicons-outline/home'
   export let status: string
   export let message: string
-  console.log(status, message)
+  console.error(status, message)
 </script>
 
-<Head />
-
-<div class="mx-auto w-full max-w-screen-md">
-  <div class="card bg-base-100 shadow-xl <md:rounded-none mb-8">
-    <div class="card-body">
-      <h1 class="card-title text-3xl">{status}</h1>
-      <div class="prose">
-        {message}
-      </div>
-    </div>
+<Card>
+  <h1 class="opacity-15 !text-12xl !<md:text-6xl !-mt-2">
+    {status}
+  </h1>
+  <h2 class="-mt-24 <md:-mt-12">{message}</h2>
+  <div>
+    <a href="/" class="btn btn-neutral !text-neutral-content shadow-xl hover:shadow-2xl mt-8">
+      <IconHome class="inline-block w-6 h-6 -ml-1 mr-2" />
+      Back to Home
+    </a>
   </div>
-  <Footer />
-</div>
+</Card>
