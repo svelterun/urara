@@ -1,24 +1,36 @@
----
 image: nberlette/gitpod-enhanced
 
-# tasks:
-#   - before:     # runs on every start; e.g. terminal configurations
-#     init:       # runs on prebuilds only; e.g. install dependencies
-#     command:    # runs on every start; e.g. hot reload dev server
-#     name:       # task name to display in the terminal
-#
+tasks:
+  - name: "urara"
+    before: pnpm install 
+    command: pnpm dev 
+    
+ports:
+  - port: "3000-5000"
+    onOpen: notify
+    visibility: public
+
+github:
+  prebuilds:
+    branches: true
+    addLabel: true
+    addCheck: true
+    addBadge: true
 
 gitConfig:
-  # https://git.io/git-ps1
+  alias.bail: "reset HEAD --"
+  alias.graph: "!git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
+  alias.amend: "!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend"
+  alias.setup: "!git init && git add . && git commit -m 'Initial commit.'"
+  alias.nb: "!git branch | grep ^* | awk '{ print $2 }'"
+  alias.cleanup: "!git ls-files -z --deleted | xargs -0 git rm"
+  alias.addnew: "!git cleanup && git add . --all"
   bash.showColorHints: "true"           # colorizes git info based on branch/upstream status
   bash.showUpstream: "auto"             # false | auto verbose name git svn (accepts > 1)
   bash.showUntrackedFiles: "false"      # % added if untracked files are detected
   bash.showStashState: "true"           # $ added if stashed files are detected
   bash.showDirtyState: "true"           # * added if tracked files are modified
   bash.hideIfPwdIgnored: "false"        # hides git prompt if cwd is in .gitignore
-  #
-  init.defaultbranch: "main"
-  #
   color.ui: "auto"
   color.branch.current: "yellow reverse"
   color.branch.local: "yellow"
@@ -30,15 +42,7 @@ gitConfig:
   color.status.added: "yellow"
   color.status.changed: "green"
   color.status.untracked: "red"
-  #
-  alias.bail: "reset HEAD --"
-  alias.graph: "!git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
-  alias.amend: "!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend"
-  alias.setup: "!git init && git add . && git commit -m 'Initial commit.'"
-  alias.nb: "!git branch | grep ^* | awk '{ print $2 }'"
-  alias.cleanup: "!git ls-files -z --deleted | xargs -0 git rm"
-  alias.addnew: "!git cleanup && git add . --all"
-  #
+  init.defaultbranch: "main"
   url.https://github.com/.insteadof: "gh:"
   url.https://gist.github.com/.insteadof: "gist:"
   url.https://gitlab.com/.insteadof: "gl:"
@@ -46,30 +50,14 @@ gitConfig:
 
 vscode:
   extensions:
-    - eamodio.gitlens
     - svelte.svelte-vscode
-    - voorjaar.windicss-intellisense
     - fivethree.vscode-svelte-snippets
+    - voorjaar.windicss-intellisense
+    - eamodio.gitlens
+    - github.vscode-pull-request-github
+    - esbenp.prettier-vscode
     - editorconfig.editorconfig
     - davidanson.vscode-markdownlint
-    - bpruitt-goddard.mermaid-markdown-syntax-highlighting
-    - github.vscode-pull-request-github
-    - streetsidesoftware.code-spell-checker
-    - esbenp.prettier-vscode
+    - christian-kohler.path-intellisense
     - christian-kohler.npm-intellisense
     - eg2.vscode-npm-script
-
-ports:
-  - port: 3000
-    onOpen: open-preview
-    visibility: public
-  - port: 5000
-    onOpen: notify
-    visibility: public
-
-github:
-  prebuilds:
-    master: true
-    branches: true
-    addLabel: true
-    addCheck: true
