@@ -1,20 +1,14 @@
-import shiki from 'shiki'
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeExternalLinks from 'rehype-external-links'
+import { escapeSvelte } from 'mdsvex'
+import { lex, parse as parseFence } from 'fenceparser'
+import { renderCodeToHTML, runTwoSlash, createShikiHighlighter } from 'shiki-twoslash'
 import { statSync } from 'fs'
 import { parse, join } from 'path'
 import { visit } from 'unist-util-visit'
 import { toString } from 'mdast-util-to-string'
 import Slugger from 'github-slugger'
-
-const highlighter = async (code, lang) =>
-  `{@html \`${await shiki.getHighlighter({ theme: 'material-default' }).then(highlighter =>
-    highlighter
-      .codeToHtml(code, { lang })
-      .replace(/[{}`]/g, c => ({ '{': '&#123;', '}': '&#125;', '`': '&#96;' }[c]))
-      .replace(/\\([trn])/g, '&#92;$1')
-  )}\` }`
 
 const remarkUraraFm =
   () =>
@@ -66,7 +60,13 @@ export const mdsvexConfig = {
     _: './src/lib/components/layout_post.svelte'
   },
   highlight: {
-    highlighter
+    highlighter: async (code, lang, meta) => {
+      let fence, twoslash
+      try { fence = parseFence(lex([lang, meta].filter(Boolean).join(' '))) }
+      catch (error) { throw new Error(`Could not parse the codefence for this code sample \n${code}`) }
+      if (fence?.twoslash === true) twoslash = runTwoSlash(code, lang)
+      return `{@html \`${escapeSvelte(renderCodeToHTML(code, lang, fence ?? {}, {}, await createShikiHighlighter({ theme: 'material-default' }), twoslash))}\` }`
+    }
   },
   remarkPlugins: [remarkUraraFm, remarkUraraSpoiler],
   rehypePlugins: [

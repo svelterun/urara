@@ -1,26 +1,32 @@
 import preprocess from 'svelte-preprocess'
 import adapterAuto from '@sveltejs/adapter-auto'
+import adapterNode from '@sveltejs/adapter-node'
 import adapterStatic from '@sveltejs/adapter-static'
 import { mdsvex } from 'mdsvex'
 import { mdsvexConfig } from './mdsvex.config.js'
 import Icons from 'unplugin-icons/vite'
-import WindiCSS from 'vite-plugin-windicss'
 
-/** @type {import('@sveltejs/kit').Config} */
-const config = {
+export default /** @type {import('@sveltejs/kit').Config} */ {
   extensions: ['.svelte', ...mdsvexConfig.extensions],
-  // Consult https://github.com/sveltejs/svelte-preprocess
-  // for more information about preprocessors
-  preprocess: [mdsvex(mdsvexConfig), preprocess()],
+  preprocess: [
+    mdsvex(mdsvexConfig),
+    preprocess({
+      postcss: {
+        plugins: true
+      }
+    })
+  ],
   kit: {
     adapter: Object.keys(process.env).some(key => ['VERCEL', 'CF_PAGES', 'NETLIFY'].includes(key))
       ? adapterAuto()
-      : adapterStatic({
+      : process.env.ADAPTER === 'node'
+        ? adapterNode({ out: 'build' })
+        : adapterStatic({
           pages: 'build',
           assets: 'build',
           fallback: null
         }),
-    target: 'body',
+    csp: { mode: 'auto' },
     vite: {
       mode: process.env.MODE || 'production',
       envPrefix: 'URARA_',
@@ -29,17 +35,8 @@ const config = {
           autoInstall: true,
           compiler: 'svelte',
           defaultClass: 'inline-block w-6 h-6'
-        }),
-        WindiCSS({
-          config: 'windi.config.js',
-          transformCSS: 'pre',
-          scan: {
-            fileExtensions: ['svelte', 'md', 'js', 'ts']
-          }
         })
       ]
     }
   }
 }
-
-export default config
